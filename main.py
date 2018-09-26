@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 
 #https://pythonspot.com/pyqt5/
+#http://zetcode.com/gui/pyqt5/widgets2/
 
 import sys
 import os
-import tempfile
-# importing required modules
 import PyPDF2
 from pdf2image import convert_from_path, convert_from_bytes
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget,QVBoxLayout, QMessageBox
@@ -22,6 +21,7 @@ class App(QMainWindow):
         self.top = 10
         self.width = 640
         self.height = 480
+        self.fullPath = "/home/shini/Documents/pdfEditor/pythonEnv/src"
         self.initUI()
 
     def testPopup(self):
@@ -30,14 +30,24 @@ class App(QMainWindow):
     def openFile(self):
         myPDF = QFileDialog.getOpenFileName()
         print(myPDF[0]) #getOpenFileName returns an array
+        baseName = os.path.basename(myPDF[0])
+        print(baseName)
 
-        with tempfile.TemporaryDirectory() as path:
-            images_from_path = convert_from_path(myPDF[0], output_folder=path)
-            print(path)
-            #temp file closed when with is exited
+        tempPath = self.fullPath+"/temp/"
 
-    def displayImg(self,myPath):
-        pixmap = QPixmap(myPath)
+        images = convert_from_path(myPDF[0])
+
+        pg = 0
+        for image in images:
+            image.save(tempPath+baseName+str(pg),"JPEG")
+            pg+=1
+        #self.displayImg(images)
+
+    def displayImg(self,images):
+        print(images)
+        pixmap = QPixmap()
+        for i in range(0, len(images)):
+            pixmap.loadFromData(images[i])
 
         lbl = QLabel(self)
         lbl.setPixmap(pixmap)
@@ -46,8 +56,6 @@ class App(QMainWindow):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-
-        self.displayImg("10003762.jpg")
 
         mainMenu = self.menuBar()
 
